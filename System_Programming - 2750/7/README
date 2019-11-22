@@ -1,0 +1,2 @@
+The file to execute is mysh, and the source is mysh.c. For the PS1, "\W" I check for the uppercase version only, mostly because that is what my PS1 is. I use feof to check for the VEOF input, and I handle the SIGINT signal. 
+From man : Execv ... functions duplicate the actions of the shell in searching for an executable file if the specified filename does not contain a slash (/) character.  So don't use leading slashes when typing commands.

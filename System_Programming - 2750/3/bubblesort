@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#Ervin Hennrich
+#cs2750
+#March 14 2018
+
+function outer() {	# a function that just echos the array out and places a newline at the end of each, so its formated right 
+arr=( "$@" )
+for (( k=0; k<${#arr[*]}; k++ ))
+do
+	echo "${arr[$k]}\n"
+done 
+}
+
+function sorter() {			#a typical bubble sort function, iterates through array and constantly compares numbers to find a number greater than all the others and swaps them behind 
+arr=( "$@" )				#smaller numbers so the smaller numbers will float to the top of the array and the larger ones sink
+for (( i=0; i<${#arr[@]}; i++ ))
+do
+	for (( j=$i; j<${#arr[@]}; j++ ))
+	do
+		if [ ${arr[$i]} -gt ${arr[$j]} ]
+		then
+			holder=${arr[$i]}
+			arr[$i]=${arr[$j]}
+			arr[$j]=$holder
+		fi
+	done
+done
+echo "$( outer "${arr[@]}" )" 	
+}
+
+
+
+if [[ -z $1 ]]
+then
+	read -p "What File would you like to have sorted?" y #incase no file is specified
+else 
+	y=$1
+fi
+file=$(find $y)
+readarray -t arr < "$file"  #pretty cool builtin command readarray basically copies contents of a file and puts it into an array (-t removes the trailing newline)
+sorted=$(sorter "${arr[@]}" )
+(echo -e $sorted | tr -d ' ' ) > $y.sorted  #used tr -d to delete spaces that occured due to brace expansion. 

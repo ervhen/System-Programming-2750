@@ -1,0 +1,40 @@
+#!/bin/bash
+PATH=/bin:usr/bin
+
+if [ -z "$1" ] #checks if user entered in anything with 411, if not it goes here and tells them to try again entering a value next time.
+then
+	echo "$USER" you are doing it wrong, 411 name
+	exit
+fi
+n=1	#used for the while loop
+w=$1
+
+while [ "$1"==1 ] #loop in case name isnt found and want to try again
+do 
+
+OUT=$(grep -i "$w" <<'EOF' 
+dial-a-joke (636) 976-3838
+dial-a-prayer (314) 246-4200
+dial santa (636) 976-3636
+dow jones report (212) 976-4141
+EOF
+)
+#searches through the list for a match to user input 
+	if [[ -z "$OUT" ]]	#if it doesnt find anything it prompts to see if user would like to try again or exit
+	then
+	read -p "That name was not found here, would you like to try another name (y) or exit (n)" -n 1 -r
+		if [[ $REPLY =~ ^[Yy]$ ]] 
+		then
+			echo 
+			echo Type the name:
+			read w
+		else
+			exit
+		fi
+	else 			#if it finds a match it outputs it to the screen then exits
+		echo
+		echo "$OUT"
+		exit
+	fi
+
+done

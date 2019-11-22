@@ -1,0 +1,87 @@
+#!/bin/bash
+#Ervin Hennrich
+#cs2750
+#March 14 2018
+
+function filer () { #I used a function to first test if a file exists, if it doesn't it skips it and moves to the next
+if [ ! -e $1 ]		
+then
+	echo "I can\'t find $1"
+	return 0
+fi
+if [ -f $1 ] 		#The next if statement tests for a file, and then if so it tests if the user is the owner as well as if they have rwx permission
+then
+	echo "$1 is a file"
+	if [ -r $1 ]
+	then 
+		echo "You have read permission on $1"
+	fi
+	if [ -w $1 ]
+	then
+		echo "You have write permission on $1"
+	fi
+	if [ -x $1 ]
+	then
+		echo "You have execute permission on $1"
+	fi
+	if [ -O $1 ]
+	then
+		echo "You are the owner of $1"
+	fi
+
+elif [ -d $1 ] 		#Next is the directory test, it does the same thing as the file test but on directories.
+then
+	echo "$1 is a directory"
+	if [ -x $1 ]
+	then
+		echo "You can search $1"
+	fi
+	if [ -r $1 ]
+	then 
+		echo "You have read permission on $1"
+	fi
+	if [ -w $1 ]
+	then
+		echo "You have write permission on $1"
+	fi
+	if [ -O $1 ]
+	then
+		echo "You are the owner of $1"
+	fi
+	
+elif [ -e $1 ] 		#This test is for weird/special files basically if it exists but isnt one of the other 2 types, the same tests are run on them to
+then
+	echo "$1 is a special file" 
+	if [ -r $1 ]
+	then 
+		echo "You have read permission on $1"
+	fi
+	if [ -w $1 ]
+	then
+		echo "You have write permission on $1"
+	fi
+	if [ -x $1 ]
+	then
+		echo "You have execute permission on $1"
+	fi
+	if [ -O $1 ]
+	then
+		echo "You are the owner of $1"
+	fi
+	
+fi
+}
+
+
+if [ -z $1 ] || [ $1 == "-h" ] #This to display my incredibly helpful help message
+then
+	echo "You need to enter in at least one file, maybe include path"
+	exit
+fi
+for u in "$@" #this loop iterates through each of the parameters the user passed to it sending them one by one into the function 
+do
+	holder=$(filer "$u")
+	echo -e "$holder"
+	echo "-----------------------------------"
+done
+	

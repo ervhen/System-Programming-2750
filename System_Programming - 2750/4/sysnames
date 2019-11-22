@@ -1,0 +1,236 @@
+#!/bin/bash
+
+#Ervin Hennrich
+#3/28/2018
+#cs 2750
+
+#To use the option to generate a/set of username(s), seperate each with a : and do not use a space after the : for example: John Smith:Ervin Hennrich    This option cant be used unless there is a outnames file present
+#This program can take awhile to complete, in retrospect I probably shouldnt have used an array to store the data but it does mean that it never outputs something wrong or incomplete (all or nothing!)
+
+
+function checker() {	#checks to see the names exist in the array
+	for (( i=0; i<($1); i++ ))  #$1 is linenumb here
+	do
+		if [ "$2" == "${arr[$i]}" ]
+		then
+			return 0
+		fi
+	done
+	return 1
+}
+
+function addchecker() { #checks to see if names exist in outnames file (for adding new names to it)
+	v="$2"
+	if grep -q "$2" outnames
+	then
+		return 0
+	else 
+		checker $linenumb $v
+	fi	
+}
+
+function tooutnames() { #function for printing the names in the format to the outnames file
+toout=0
+if [ ! -e outnames ]
+then
+	printf "%-30s %-30s %-30s\n" "First Name" "Last Name" "Username" >> outnames
+	printf "%-30s %-30s %-30s\n" "------------------------------" "------------------------------" "------------------------------" >> outnames
+fi
+while read -r line
+do
+	firstname=$(echo $line | awk -F'[, ]' '{	
+		if ( /,/ != 0)  {
+			printf(toupper(substr($2, 1, 1))tolower(substr($2, 2)));
+		}
+		else {
+			printf(toupper(substr($1,1, 1))tolower(substr($1, 2)));
+		}
+		}')
+	lastname=$(echo $line | awk -F'[, ]' '{
+		if ( /,/ != 0)  {
+			printf(toupper(substr($1, 1, 1))tolower(substr($1, 2)));
+		}
+		else {
+			printf(toupper(substr($NF, 1, 1))tolower(substr($NF, 2)));
+		}
+		}')
+	username=${arr[$toout]}
+	printf "%-30s %-30s %-30s\n" "$firstname" "$lastname" "$username" >> outnames
+	((toout+=1))
+done < $inner
+}
+
+function namemaker() { #this generates usernames and checks them against checker or addchecker
+	if [ "$3" == 8 ] #needed to seperate which checker was used
+	then
+		x="checker"
+	else 
+		x="addchecker"
+	fi
+	sectry=$(echo $line | awk -F'[, ]' '{	
+		if ( /,/ != 0)  {
+			printf(tolower(substr($2, 1, 8)));
+		}
+		else {
+			printf(tolower(substr($1, 1, 8)));
+		}
+		}')
+	$x $linenumb $sectry
+	checks2=$?
+	if [[ $checks2 == 0 ]]
+	then
+		thirdtry=$(echo $line | awk -F'[, ]'	'{
+		if ( /,/ != 0)  {
+			printf(tolower(substr($2, 1, 1)substr($1, 1, 7)))
+		}
+		else {
+			printf(tolower(substr($1, 1, 1)substr($NF, 1, 7)));
+		}
+		}')
+		$x $linenumb $thirdtry
+		checks3=$?
+		if [[ $checks3 == 0 ]]
+		then
+			fourthtry=$(echo $line | awk -F'[, ]'   '{
+				if ( /,/ != 0)  {
+					printf(tolower(substr($2, 1, 7)substr($1, 1, 1)));
+				}
+				else {
+					printf(tolower(substr($1, 1, 7)substr($NF, 1, 1)));
+				}
+				}')
+			$x $linenumb $fourthtry
+			checks4=$?
+			if [[ $checks4 == 0 ]]
+			then	
+				fifthtry=$(echo $line | awk -F'[, ]'	'{
+					if ( /,/ != 0)  {
+						printf(tolower(substr($1, 1, 7)substr($2, 1, 1)));
+					}
+					else {
+						printf(tolower(substr($NF, 1, 7)substr($1, 1, 1)));
+					}
+					}')
+				$x $linenumb $fifthtry
+				checks5=$?
+				if [[ $checks5 == 0 ]]
+				then
+					sixthtry=$(echo $line | awk -F'[, ]'	'{
+						if ( /,/ != 0)  {
+							printf(tolower(substr($2, 1, 1)substr($1, 1, 5)));
+						}
+						else {
+							printf(tolower(substr($1, 1, 1)substr($NF, 1, 5)));
+						}
+						}')
+					addit=1
+					pad='0'
+					sixthtryfirst=$sixthtry$pad$addit
+					$x $linenumb $sixthtryfirst
+					checks6=$?
+					if [[ $checks6 == 0 ]]
+					then
+						while [ $checks6 == 0 ]
+						do	
+							((addit+=1))
+							if [ $addit > 9 ]
+							then
+								pad='0'
+							elif [ $addit > 99 ]
+							then
+								addit=99
+							else
+								pad=''
+							fi
+							sixthtrytest=$sixthtry$pad$addit
+							$x $linenumb $sixthtrytest
+							checks6=$?
+						done
+						sixthtry=$sixthtrytest
+					else
+						sixthtry=$sixthtryfirst
+					fi
+					echo $sixthtry
+					
+				else
+					echo $fifthtry
+				fi
+			else 
+				echo $fourthtry	
+			fi
+		else 
+			echo $thirdtry
+		fi
+	else
+		echo $sectry
+	fi
+}
+#generates names based upon the names file or one specified, can also add names to the outnames once it exists. Uses each checker (depending on which way it is called) and sends it to namemaker() if the first try fails
+linenumb=0
+if [ -z $1 ]
+then
+	read -p "Should I use the file names?(Y or N)" -n 1 yn
+	case $yn in
+	       	[Yy]* ) inner=names
+		 ;;
+		[Nn]* ) read -p "From what file would you like me to read from" other
+			inner=$other
+		;;
+	esac	
+elif [ -n "$1" ] #for adding names to the outnames file
+then
+	echo "$@" | sed 's/\:/\n/g' > etempfile
+	inner=etempfile
+	x=1
+	while read -r line
+	do
+		onetry=$(echo $line | awk -F'[, ]' '{
+			if ( /,/ != 0)  {
+				printf(tolower(substr($1, 1, 8)));
+			}
+			else {
+				printf(tolower(substr($NF, 1, 8)));
+			}
+			}')
+		addchecker $linenumb $onetry
+	        checks=$?
+		$onec++	
+		if [[ $checks == 0 ]]  #variables are global unless marked as local
+		then
+			final=$(namemaker $linenumb $onetry $x)	
+		else
+			final=$onetry
+		fi
+		arr[$linenumb]=$final	
+		((linenumb+=1))
+	done < $inner
+	tooutnames
+	rm etempfile
+	exit
+fi
+#this is the main part of the program and this is what generates the original outnames file.
+totlinenumb=$(wc -l $inner || awk {print $1})
+declare -a arr
+x=8
+while read -r line
+do
+	onetry=$(echo $line | awk -F'[, ]' '{
+		if ( /,/ != 0)  {
+			printf(tolower(substr($1, 1, 8)));
+		}
+		else {
+			printf(tolower(substr($NF, 1, 8)));
+		}
+		}')
+	checker $linenumb $onetry 8
+	checks=$?
+	if [[ $checks == 0 ]]  #variables are global unless marked as local
+	then
+		final=$(namemaker $linenumb $onetry $x)	
+	else
+		final=$onetry
+	fi
+	arr[$linenumb]=$final	
+	((linenumb+=1))
+done < $inner
+tooutnames

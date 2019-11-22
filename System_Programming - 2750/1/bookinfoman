@@ -1,0 +1,33 @@
+.TH BookInfo 1 "Keep track of your books"
+.SH NAME
+ Bookinfo - Tool for storing book information and printing
+.SH SYNOPSIS
+.B bookinfo [OPTION] [search]
+.B bookinfo [n]
+
+.SH DISCRIPTION
+Bookinfo takes in [n] (n being any positive number) and prompts the user to enter in book data, either through guided prompts or by line. It stores this information into a books file. The -print option will print the books file into another file (book_print) in an easy to read format. If a book_print file already exists it prompts the user to remove it, if user declines then it appends the list to the current one.
+
+.SH OPTIONS
+
+	-f	Searches through books and prints any matching book information to book_print. Is case sensitive
+
+	-i	Same as -f but NOT case sensitive
+
+.SH EXAMPLES 
+.PP
+
+$ bookinfo 1	allows user to enter in 1 book
+
+$ bookinfo -f Tolkien 	finds all books in books file with Tolkien in the info.
+
+$ bookinfo -i tolkien	same as above
+
+$ bookinfo print 	creates file book_print, if one exists it prompts user to remove it or it will append to end of the current book_print.
+
+.SH SEE ALSO
+There isn't much to see here.
+
+.SH AUTHOR
+
+	Ervin Hennrich

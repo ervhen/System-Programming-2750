@@ -1,0 +1,84 @@
+#!/bin/bash
+
+#Ervin Hennrich
+#Feb 25, 2017
+#CS2750
+#My high-score is 980
+
+PATH=/bin:usr/bin
+
+
+echo "*********Welcome to the Dice Game***********"
+
+
+points=0 	#points is calculated by pointcalc(). It is based upon the number of times a score can occur (it is the reward)
+yn="y"		#yn is used to hold the user input on wether to continue looping, if user enters 'n' script ends immediatly
+score=0		#score is the addition of die1 and die2 (both randomly generated using the bash internal command RANDOM) and is between 2 and 12
+scorecalc=0	#scorecalc is used in hope(). It holds the count, or number ways the score can occur (in the scope of this script it has a range of 1-6)
+totepoints=0	#totepoints is used a running total of points within each run.
+
+function hope() {	#hope() calculates the number of times a score can occur. Runs through numbers 1-6 counting the ways to display a number (n + m) using nested for loops and a boolean switch
+	uber=$(( $1 + $2 )) #is just score, but defined within this function mostly for clarity
+	switch=true	    #boolean switch used to gate off duplicate counts, if n=m then n+m is only counted once
+	for (( i=6; i>0; i-- ))
+	do
+		for (( j=1; j<=6; j++ ))
+		do
+			holder=$(( $i+ $j ))
+			if [ "$holder" -eq "$uber" ] && [ "$switch" = true ]
+			then
+				scorecalc=$(( $scorecalc + 1 ))   #counts the number of times holder == uber
+				if [ "$i" -eq "$j" ]		  #turns off the switch when finds case n=m
+				then
+					switch=false
+				fi
+			fi
+		done
+	switch=true
+	done
+	echo "$scorecalc"
+}
+
+function pointcalc() {	#calculates the reward using given amounts
+	if [ $2 == 4 ]
+	then
+		pointcalhold=50
+	elif [ $2 == 10 ]
+	then
+		pointcalhold=100
+	else
+		pointcalhold=$(( (10 - $1) * 10 ))
+	fi
+	echo $pointcalhold
+}
+
+while [ $yn="y" ]	#main loop
+do
+	read -p "Want to roll the dice?(y or n)" -n 1 yn
+	if [[ "$yn" == y* ]]
+	then
+		die1=$((1 + RANDOM % 6 ))	#using RANDOM generates a random number
+		die2=$((1 + RANDOM % 6 ))
+		echo
+		echo "You rolled a $die1 and  $die2"	
+			if [ "$die1" -eq "$die2" ]	#losing scenerio, if the random numbers are the same
+			then
+				reward=0
+				echo "Sorry, you lost. Better luck next time!"
+				echo "Your reward is $reward"
+				exit
+			fi
+		score=$(( $die1 + $die2 ))
+		count=$(hope $die1 $die2)	#the count, or number of ways a number can be expressed with the ints 1-6
+		points=$(pointcalc $count $score)	#the points as definined by pointcalc()
+		totepoints=$(( $points + totepoints ))
+		echo "Your score is: $score"
+		echo "Your reward for this run is: $points"
+		echo "Your total reward is: $totepoints"
+	
+	else 
+		exit
+	fi
+done
+
+

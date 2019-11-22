@@ -1,0 +1,26 @@
+#!/bin/bash
+
+echo -n 'Hello, ' #simple hello to user 
+echo $USER
+n=$1
+if [ -z "$n" ]; #assigns the variable to 20 if none is entered
+then
+	n=20
+fi
+
+while [ $n -ne 0 ]; do #goes through the loop counting down and if any number it is at is divisible by 3 and/or 5 it displays different words
+	if (( $n % 3 ==0 )) && (( $n % 5 ==0)) 
+	then 
+		echo FizzBuzz 
+	elif (( $n % 5 == 0 ))
+	then 
+		echo Buzz
+	elif (( $n % 3 == 0 ))
+	then 
+		echo Fizz
+	else 
+		echo $n
+	fi
+	let n=n-1
+done
+	

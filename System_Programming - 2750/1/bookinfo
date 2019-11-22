@@ -1,0 +1,121 @@
+#!/bin/bash
+
+
+if [[ -z $1 ]] #checks if user entered in anything with 411 call, if not script starts here, and asks for the number 
+then
+	read -p "How many books do you want to enter in?" q
+	set -- "$q" "$1"
+fi 
+if [ $1 -ge 0 2>/dev/null ] #checks for any positive number then asks how you would like to input the information 
+then
+	
+	echo "Would you like to enter the books by line(1) or prompt(2)?" 
+	read y
+fi
+
+#if user chose to do it themselves, user inputs the info on a single line seperated by ~ and appends each line to books
+if [[ "$y" -eq 1 ]]
+then
+		for ((i="$1"; i > 0; i--))
+		do
+		echo
+		read -p "Enter the Title~Author\(s\)~Publisher~Year of Production each seperated by \~" R 
+		echo $R >> books #appends to books file
+	done
+elif [[ "$y" -eq 2 ]] #if user chose by prompt, prompts guide them through entering in info
+then
+		for ((i="$1"; i > 0; i--))
+		do
+		read -p "Booktitle: " R 
+		read -p "Author(s): " E
+		read -p "Publisher: " A
+		read -p "Year of publication: " D
+		echo $R~$E~$A~$D  >> books #appends to books file
+	done
+fi
+
+if [[ "$1" == "-f" ]] #if user entered in a -f followed by a patteren that pattern will be searched for in the books file then output
+then
+	if [[ -f "./book_print" ]] #checks to see if there is already a book_print file if so asks to delete it, otherwise just appends the info to the previous one
+	then	#this is in each of the print options and probably should be on its own if it where to be optimized
+		read -p "A book_print already exits. Would you like to delete it now? " -n 1 yn
+		case $yn in #use case for branch
+			[Yy]* ) rm "book_print";
+			;;
+			[Nn]* ) echo " There is now another set of books in book_print"; 
+			;;
+		esac
+	else 
+		echo
+	fi
+
+	grep "$2" books | while read -r line #reads the output of grep command on books file then formats it to go into book_print
+	do
+		echo -n "Title: " >> book_print
+		echo $line | cut -d \~ -f1 >> book_print
+		echo -n  "Author(s): " >> book_print
+		echo $line | cut -d \~ -f2 >> book_print
+		echo -n "Publisher: " >> book_print
+		echo $line | cut -d \~ -f3 >> book_print
+		echo -n "Year of Publication: " >> book_print
+		echo  $line | cut -d \~ -f4 >> book_print
+		echo >> book_print
+		done 
+
+elif [[ "$1" == "-i" ]] #same as -f but not case sensitive
+then
+	if [[ -f "./book_print" ]]
+	then
+		read -p "A book_print already exits. Would you like to delete it now? " -n 1 yn
+		case $yn in
+			[Yy]* ) rm "book_print";
+			;;
+			[Nn]* ) echo " There is now another set of books in book_print"; 
+			;;
+		esac
+	else 
+		echo
+	fi
+
+	grep -i "$2" books | while read -r line
+	do
+		echo -n "Title: " >> book_print
+		echo $line | cut -d \~ -f1 >> book_print
+		echo -n  "Author(s): " >> book_print
+		echo $line | cut -d \~ -f2 >> book_print
+		echo -n "Publisher: " >> book_print
+		echo $line | cut -d \~ -f3 >> book_print
+		echo -n "Year of Publication: " >> book_print
+		echo  $line | cut -d \~ -f4 >> book_print
+		echo >> book_print
+		done 
+
+elif  [[ "$1" == "print" ]] #same as -f and -i mostly, reads the books file then prints that into book_print in the specified format
+then
+	if [[ -f "./book_print" ]]
+	then
+		read -p "A book_print already exits. Would you like to delete it now? " -n 1 yn
+		case $yn in
+			[Yy]* ) rm "book_print";
+			;;
+			[Nn]* ) echo " There is now another set of books in book_print"; 
+			;;
+		esac
+	else 
+		echo
+	fi
+		
+	IFS=''
+	while read line
+	do	
+		echo -n "Title: " >> book_print
+		echo $line | cut -d '~' -f 1 >> book_print
+		echo -n  "Author(s): " >> book_print
+		echo $line | cut -d '~' -f 2 >> book_print
+		echo -n "Publisher: " >> book_print
+		echo $line | cut -d '~' -f 3 >> book_print
+		echo -n "Year of Publication: " >> book_print
+		echo  $line | cut -d '~' -f 4 >> book_print
+		echo >> book_print
+	done < books	
+fi

@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ -z $1 ] 
+then		#Don't need to remove the begining file names if it is just searching down, the find command returns the relative paths already  
+	find $1 | sed 's/[^\/]*\//   |----/g; s/----  /    /g; s/\./ / '
+else		#delimer is used to find the path of the starting file so it can be removed by the next line
+	delimer=$(find $1 -printf "%h\t" | grep -o "$1" | tr '\n' '\t' | cut -f1)
+	find $1 | sed "s|"\\$delimer"| |g" |  sed 's/[^\/]*\//   |----/g; s/----  /    /g; s/\./ / '  #this line took me awhile, basically uses delimer to remove the extra path info, then finds slashes
+fi		#and replaces them with specified chars, another sed command finds the dashes without words behind them and removes those, and the last sed removes the pesky .

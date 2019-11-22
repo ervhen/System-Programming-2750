@@ -1,0 +1,46 @@
+#!/bin/bash
+
+#Ervin Hennrich
+#CS2750
+#Febuary 22, 2018
+
+x=1
+
+while [[ $x==1 ]] #Enter while loop to enter data
+do
+	echo "So you wish to join the team?"
+
+	read -p "Alright, what's your name?" Name 	#ask user for name, checks to make sure a name was entered
+	while [[ -z $Name ]]
+	do
+		read -p "Hey, I need a name kid." Name
+	done
+
+	echo "Okay, $Name what are your times"		#five prompts for the user to enter in data
+	read -p "First: " first	
+	read -p "Second: " second
+	read -p "Third: " third
+	read -p "Fourth: " fourth
+	read -p "Fifth: " fifth
+	totes=$(bc <<< "scale=2;$first+$second+$third+$fourth+$fifth")	#used bc command to do the math, assuming floating point numbers will be entered
+	totesish=$(bc <<< "scale=2;$totes/5")				#finds the average of all 5 of the entered ammounts
+	tester=$(bc <<< "scale=2;$totesish<=11.5")			#tests average to make sure it is under (or at) the cutoff, 11.5
+	echo
+	if [[ $tester -eq 1 ]]				#checks the output of the the past test(2 lines up) output of a relational test will be 1 for true
+	then						#displays wether the average was greater than 11.5
+		echo "Kid you got talent! Welcome to the team."
+	else 
+		echo "Close, but you did not make the cut."
+	fi
+	read -p "Is there anyone else in line?(y/n)" -n 1 yn	#loops back to the begining to try again or exits
+	case $yn in
+		[Yy]* ) echo 
+		echo "Okay come on up!"
+		echo
+		;;
+		[Nn]* ) x=0
+		echo
+		exit
+		;;
+	esac
+done

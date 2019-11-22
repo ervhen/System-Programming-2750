@@ -1,0 +1,33 @@
+#!/bin/bash
+PATH=/bin:usr/bin
+
+if [[ -z $1 ]] #checks if user entered in a directory to be searched
+then #if no directory is specified starts here and searches from current
+	find -printf "\n%s %f\n" | sort -g #searches and prints files to screen sorted by size 
+	n=$(find -printf "\n%s%y" | grep 0f | find -empty | wc -w) #finds how many files are 0 size
+	let n=n-1 #for the array
+	arr=($(find -printf "\n%f %s%y\n" | grep 0f | find -empty)) #puts the file names that are empty into an array
+else 
+	find "$1" -printf "\n%s %f\n" | sort -g #searches from specified directory and lists files
+	n=$(find "$1" -printf "\n%s%y" | grep 0f | wc -w) #counter
+	let n=n-1
+	arr=($(find "$1" -printf "\n%p %s%y\n" | awk '$2 ~ /0f/ {print $1}')) #array for this, i used awk instead here for fun
+fi
+	
+echo 
+echo there is/are $[n+1] file\(s\) that have 0 size  #tells you how many files it found
+echo
+
+for (( i=$n; i>-1; i-- )) #runs through the array asking you if you want to delete the specified file if y deletes it otherwise does nothing
+	do
+		read -p "Would you like to delete ${arr[$i]} ? (y or n)" -n 1 -r
+		echo 
+		if [[ $REPLY =~ ^[Yy]$ ]]
+		then
+			find ${arr[$i]} -delete
+		fi
+done 
+
+
+
+

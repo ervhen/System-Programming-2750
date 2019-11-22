@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#Ervin Hennrich
+#Feb 25, 2018
+#CS2750
+
+
+
+#uses awk to search through studentlist.csv for the specified words then prints the lines it finds that match in the specified format
+#FS specifies the delimiter, so it knows how to print the fields and what fields to look at (in the off chance someone's name is one of the specified words)
+awk 'BEGIN{ FS=","; } $5 ~ /Freshman/ || /Sophomore/{print $6, "\t", "("$3, $2")"}'  studentlist.csv >> cs-lower
+awk 'BEGIN{ FS=","; } $5 ~ /Junior/ || /Senior/ { print $6, "\t", "("$3, $2")"}' studentlist.csv >> cs-upper
+
